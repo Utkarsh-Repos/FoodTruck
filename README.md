@@ -47,7 +47,7 @@ This management command imports food truck data from a CSV file into the `FoodTr
 ``` python manage.py import_food_trucks```
 <br>
 <br>
-
+**Note:-** can see uploaded data in django admin after create the superuser
 
 ## FoodTruckListView API
 
@@ -81,4 +81,10 @@ curl --location --request GET 'http://127.0.0.1:8000/foodtruck_finder/finder/?la
 
 ```http
 GET http://127.0.0.1:8000/foodtruck_finder/finder/?latitude=37.8045778690901&longitude=-122.433010774343&radius=1
+```
+
+### UI Representation
+
+```http
+http://127.0.0.1:8000/
 ```

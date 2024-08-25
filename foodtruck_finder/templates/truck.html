@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Nearby Food Trucks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #218838;
+        }
+
+        #results {
+            margin-top: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        #results h2 {
+            margin-top: 0;
+            color: #444;
+        }
+
+        #results ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #results li {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div id="whole-form">
+        <h1>Find Nearby Food Trucks</h1>
+
+        <form action="/api/food-trucks/" method="GET">
+            <label for="latitude">Latitude:</label>
+            <input type="text" id="latitude" name="latitude" required>
+
+            <label for="longitude">Longitude:</label>
+            <input type="text" id="longitude" name="longitude" required>
+
+            <label for="radius">Radius (km):</label>
+            <input type="number" id="radius" name="radius" value="1">
+
+            <input type="submit" value="Find Food Trucks">
+        </form>
+        </div>
+        <!-- Display results here -->
+        <div id="results" style="display:none;"></div>
+    </div>
+
+    <script>
+        document.querySelector('form').onsubmit = function(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const latitude = form.latitude.value;
+            const longitude = form.longitude.value;
+            const radius = form.radius.value;
+
+            fetch(`/foodtruck_finder/finder?latitude=${latitude}&longitude=${longitude}&radius=${radius}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+
+            // Clear previous results
+            resultsDiv.innerHTML = '';
+
+            // Create container for heading and link
+            const headerDiv = document.createElement('div');
+            headerDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: center;';
+
+            // Create "Nearby Food Trucks" heading
+            const heading = document.createElement('h2');
+            heading.textContent = 'Nearby Food Trucks';
+            headerDiv.appendChild(heading);
+
+            // Create "Return to form" link
+            const returnToForm = document.createElement('a');
+            returnToForm.href = '/';
+            returnToForm.textContent = 'Return to form';
+            returnToForm.style.cssText = 'cursor: pointer; border: 1px solid blue; color: white; background: blue; text-decoration: none; padding: 10px; border-radius: 10px;font-weight: bold;';
+
+            returnToForm.onclick = function(event) {
+                event.preventDefault();  // Prevent default behavior
+                document.querySelector('#whole-form').style.display = 'block';
+                resultsDiv.innerHTML = '';
+                resultsDiv.style.cssText = '';
+            };
+            headerDiv.appendChild(returnToForm);
+
+            // Append the headerDiv to the results div
+            resultsDiv.appendChild(headerDiv);
+
+
+                    if (data.length === 0) {
+                        resultsDiv.innerHTML += '<p>No food trucks found within the specified radius.</p>';
+                        document.querySelector('#whole-form').style.cssText = `display:none;`;
+                        document.querySelector('#results').style.cssText = `display:block;`;
+                    } else {
+                        const list = document.createElement('ul');
+                        data.forEach(truck => {
+                            const listItem = document.createElement('li');
+
+                            const applicant = document.createElement('h2');
+                            applicant.textContent = truck.applicant;
+
+                            const location_description = document.createElement('h4');
+                            location_description.textContent = truck.location_description;
+
+                            const food_items = document.createElement('p');
+                            food_items.textContent = `Food Items: ${truck.food_items}`;
+
+                            const facility_type = document.createElement('p');
+                            facility_type.textContent = `Facility Type: ${truck.facility_type}`;
+
+                            const address = document.createElement('p');
+                            address.textContent = `Address: ${truck.address}`;
+
+                            const coordinates = document.createElement('p');
+                            coordinates.textContent = `Coordinates: (${truck.latitude}, ${truck.longitude})`;
+
+                            // Append elements to the list item
+                            listItem.appendChild(applicant);
+                            listItem.appendChild(location_description);
+                            listItem.appendChild(facility_type);
+                            listItem.appendChild(food_items);
+                            listItem.appendChild(address);
+                            listItem.appendChild(coordinates);
+
+                            // Append the list item to the list
+                            list.appendChild(listItem);
+                        });
+                        resultsDiv.appendChild(list);
+                        document.querySelector('#whole-form').style.cssText = `display:none;`;
+                        document.querySelector('#results').style.cssText = `margin-top: 244px; display:block;`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching food trucks:', error);
+                });
+        };
+    </script>
+</body>
+</html>
